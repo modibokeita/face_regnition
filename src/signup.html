@@ -1,0 +1,235 @@
+<html lang="tr" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+        <title>REGISTER</title>
+        <style>
+            body{
+                margin: 0;
+                padding: 0;
+                font-family: sans-serif;
+                background: #e6eaed;
+            }
+
+            .box{
+                width: 300px;
+                padding: 20px;
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%,-50%);
+                background: #191919;
+                text-align: center;
+                border-radius: 20px 20px;
+            }
+
+            .box h1{
+                color: white;
+                text-transform: uppercase;
+                font-weight: 500;
+                background: linear-gradient(
+                    to right,
+                    hsl(1 100% 50%),
+                    hsl(100 100% 50%)
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-align: center;
+            }
+
+            .box input[type = "text"],.box input[type = "password"]{
+                border:0;
+                background: none;
+                display: block;
+                margin: 5px auto;
+                text-align: center;
+                border: 2px solid #D4AC0D;
+                padding: 14px 10px;
+                width: 200px;
+                outline: none;
+                color: white;
+                border-radius: 24px;
+                transition: 0.5s;
+            }
+
+            .box input[type = "text"]:focus,.box input[type = "password"]:focus{
+                border-color: #A04000;
+                width: 250px;
+            }
+
+            .box input[type = "text"]:hover,.box input[type = "password"]:hover{
+                border-color: #A04000;
+            }
+
+            .box input[type = "submit"]{
+                border:0;
+                background: none;
+                display: block;
+                margin: 20px auto;
+                text-align: center;
+                border: 2px solid #D4AC0D;
+                padding: 14px 40px;
+                outline: none;
+                color: white;
+                transition: 0.25s;
+                cursor: pointer;
+            }
+
+            .box input[type = "submit"]:focus{
+                border-color: #D4AC0D;
+            }
+
+            .box input[type = "submit"]:hover{
+                background: #D4AC0D;
+                border-radius: 24px;
+            }
+
+            a {
+                font-family: "Dank Mono", ui-monospace, monospace;
+                background: linear-gradient(
+                    to right,
+                    hsl(98 100% 62%),
+                    hsl(204 100% 59%)
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-align: center;
+            }
+            .loader {
+                position: fixed;
+                left: 0;
+                font-family: Arial, Helvetica, sans-serif;
+                display: none;
+                height: 100%;
+                width: 100%;
+                background-color: rgba(0, 0, 0, 0.7);
+                padding-top: 40vh;
+            }
+            .loader label {
+                text-align: center;
+                display: block;
+                margin-top: 70px;
+                font-size: 25px;
+                letter-spacing: 2px;
+                color: #FF9800;
+
+            }
+            .circle span {
+                width: 40px;
+                height: 40px;
+                display: block;
+                background-color: #FFC107;
+                border-radius: 100%;
+                margin: 0 auto;
+            }
+            .circle {
+                border: 10px solid #FF9800;
+                padding: 10px;
+                width: 100px;
+                border-radius: 100px;
+                margin: 0  auto;
+                -webkit-animation: spin 2s linear infinite;
+                animation: spin 2s linear infinite;
+            }
+            @-webkit-keyframes spin {
+                0% { -webkit-transform: rotate(0deg);}
+                100% {transform: rotate(360deg);}
+            }
+        </style>
+    </head>
+    <body>
+        <div class="box">
+            <h1>REGISTER FACE</h1>
+
+            <input type="text" id="user" placeholder="your name" required name="name">
+
+            <div class="focus-camera">
+                <video id="output-camera"></video>
+                <img id="captured-photo" style="width: 200px; height: auto; display: none;" src="">
+                <canvas id="render" style="display: none;"></canvas>
+            </div>
+
+            <input type="submit" value="REGISTER" id="register">
+            <br>
+            <label style="color: #fff;">
+                If your face has been registered, click <a style="color: aqua;" href="/">Login.</a>
+            </label>
+            <br><br>
+        </div>
+        <div class="loader">
+            <div class="circle"><span></span></div>
+            <label>loading</label>
+        </div>
+        <script>
+            var video = document.getElementById('output-camera');
+            var canvas = document.getElementById('render');
+            var img = document.getElementById('output-img');
+            var capturedPhoto = document.getElementById('captured-photo');
+            video.setAttribute('playsinline', '');
+            video.setAttribute('autoplay', '');
+            video.setAttribute('muted', '');
+            video.style.width = '200px';
+            video.style.height = '200px';
+
+            /* Setting up the constraint */
+            var facingMode = "user"; // 
+            var constraints = {
+                audio: false,
+                video: {
+                    facingMode: facingMode
+                }
+            };
+
+            /* Stream it to video element */
+            navigator.mediaDevices.getUserMedia(constraints).then(function success(stream) {
+                video.srcObject = stream;
+            });
+            $('#register').click(function(e){
+                e.preventDefault();
+                canvas.width = video.videoWidth; // Use video's width and height
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0, video.videoWidth, video.videoHeight); // Capture the current frame from the video
+
+                // Store the captured image in the 'captured-photo' element
+                capturedPhoto.src = canvas.toDataURL("image");
+                capturedPhoto.style.display = 'block';
+
+                var d = new Date();
+                var time = d.getTime();
+
+                var imgSource = $('#captured-photo').attr('src');
+                var user = $('#user').val();
+
+                mydata = {
+                    image: capturedPhoto.src,
+                    user: user, 
+                    url: imgSource
+                };
+                console.log("DATA TO DISPATCH: ",mydata);
+
+                $.ajax({
+                    url: "http://localhost:8081/register",
+                    method: "POST",
+                    data: {
+                            image: capturedPhoto.src,
+                            user: user 
+                        },
+                    dataType: "JSON",
+                    beforeSend: function(){
+                        $('.loader').show();
+                    },
+                    success: function(data) {
+                        console.log(data);
+                        console.log(data[0]['_label']);
+                        location.href = 'face-recognition/index.html';
+                    },
+                    error: function(jqXHR, textStatus, errorThrown){
+                        console.log('Error POST',errorThrown);
+                    }
+                });
+            });
+
+        </script>
+          </body>
+</html>
